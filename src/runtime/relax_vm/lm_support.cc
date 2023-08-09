@@ -76,6 +76,12 @@ class AttentionKVCacheObj : public Object {
    * \param shape The cached values.
    */
   NDArray View(const ShapeTuple& shape) {
+#ifdef LLM_PROFILING
+    // LHK: auto pop to support profile
+    if (fill_count > shape[0]) {
+      PopN(fill_count - shape[0]);
+    }
+#endif // !LLM_PROFILING
     CHECK_EQ(shape[0], fill_count) << "Requested shape do not match the filled count";
     for (int i = 1; i < this->data->ndim; ++i) {
       CHECK_EQ(shape[i], data->shape[i]) << "Dimension " << i << " mismatch";
